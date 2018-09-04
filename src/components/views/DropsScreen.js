@@ -1,16 +1,11 @@
 import React from 'react';
-import { Text, View, TextInput, TouchableHighlight } from 'react-native';
+import { Text, ScrollView, TextInput, TouchableHighlight } from 'react-native';
 import styled from 'styled-components';
 import { Constants, Location, Permissions } from 'expo'
 import { firestore } from '../../lib/config/firebase';
 import moment from 'moment';
 
-const Wrapper = styled.View`
-	height: 100%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
+const Wrapper = styled.ScrollView`
 `;
 
 const Drop = styled.View`
@@ -42,7 +37,7 @@ const RefreshButton = styled.TouchableHighlight`
 	border-radius: 25px;
 	background: blue;
 	padding: 10px;
-	margin: 10px;
+	margin: 10px auto;
 `;
 
 const RefreshText = styled.Text`

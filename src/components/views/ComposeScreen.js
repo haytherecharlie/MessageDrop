@@ -1,16 +1,19 @@
 import React from 'react';
-import { Text, View, TextInput, TouchableHighlight } from 'react-native';
+import { Keyboard, Text, View, TouchableHighlight } from 'react-native';
 import styled from 'styled-components';
 import { Constants, Location, Permissions } from 'expo'
 import moment from 'moment';
 import { firestore } from '../../lib/config/firebase';
+import MapView, { Marker, Circle } from 'react-native-maps';
+import DropMap from '../atoms/DropMap';
+import MessageForm from '../molecules/MessageForm';
 
 const Wrapper = styled.View`
 	height: 100%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
+	justify-content: flex-start;
 `;
 
 const Date = styled.Text`
@@ -24,101 +27,69 @@ const LatLon = styled.Text`
 	color: orange;
 `;
 
-const Input = styled.TextInput`
-	border: 1px solid #000;
-	width: 100%;
-	padding: 10px;
-	font-size: 17px;
-`;
-
-const Submit = styled.TouchableHighlight`
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 75%;
-	border-radius: 25px;
-	background: blue;
-	padding: 10px;
-	margin: 10px;
-`;
-
-const SubmitText = styled.Text`
-	color: #fff;
-	font-size: 17px;
-	font-weight: 600;
-`;
-
 export default class App extends React.Component {
 
-	static navigationOptions = {
-		title: 'Compose',
-	};
+    static navigationOptions = {
+        title: 'MessageDrop',
+    };
 
-	state = {
-		errorText: null,
-		message: "",
-		timestamp: null,
-		latitude: null,
-		longitude: null
-	}
+    state = {
+        errorText: null,
+        position: {
+            lat: null,
+            lng: null,
+            time: null,
+            mapData: null
+        }
+    }
 
-	componentDidMount() {
-		return this.getGeoLocation();
-	}
+    componentDidMount() {
+        return this.getGeoLocation();
+    }
 
-	getGeoLocation = async () => {
-		let { status } = await Permissions.askAsync(Permissions.LOCATION);
-		return status === 'granted'
-			? this.statusGranted()
-			: this.statusDenied();
-	}
+    getGeoLocation = async () => {
+        let { status } = await Permissions.askAsync(Permissions.LOCATION);
+        return status === 'granted' ? this.statusGranted() : this.statusDenied();
+    }
 
-	statusGranted = async () => {
-		let location = await Location.getCurrentPositionAsync({});
-		let latitude = Math.round(location.coords.latitude * 100) / 100;
-		let longitude = Math.round(location.coords.longitude * 100) / 100;
-		let timestamp = location.timestamp;
-		return this.setState({ timestamp, latitude, longitude });
-	}
+    statusGranted = async () => {
+        let mapData = await Location.getCurrentPositionAsync({});
+        return this.setState({
+            position: {
+                lat: Math.round(mapData.coords.latitude * 100) / 100,
+                lng: Math.round(mapData.coords.longitude * 100) / 100,
+                time: mapData.timestamp,
+                mapData
+            }
+        });
+    }
 
-	statusDenied = () => {
-		return this.setState({
-			errorText: 'Permission to access location was denied'
-		});
-	}
+    statusDenied = () => {
+        return this.setState({ errorText: 'Permission to access location was denied' });
+    }
 
-	handleTextChange = message => {
-		return this.setState({ message })
-	}
+    drawMap = () => {
+        if (this.state.position.lat) {
+            return (
+                <DropMap lat={this.state.position.lat} lng={this.state.position.lng} >
+                    <Marker coordinate={this.state.position.mapData.coords} title="Your Location" description="This is where you currently are." />
+                    <Circle center={{ latitude: this.state.position.mapData.coords.latitude, longitude: this.state.position.mapData.coords.longitude }} radius={500} strokeColor='#ff2353' fillColor='rgba(255,255,255,0.6)' />
+                </DropMap>
+            );
+        }
+        return null;
+    }
 
-	submitMessageDrop = () => {
-		const { timestamp, latitude, longitude, message } = this.state;
-		const areaCode = `?lat=${latitude}&lon=${longitude}`;
-		firestore.collection('messages').doc('drops').collection(areaCode).doc().set({
-			timestamp, latitude, longitude, message
-		});
-		return this.setState({ message: "" })
-
-	}
-
-	render() {
-		return (
-			<Wrapper>
-				<Date>{moment(this.state.timestamp).format('MMMM Do YYYY, h:mm:ss a')}</Date>
-				<LatLon>Lat: {this.state.latitude}</LatLon>
-				<LatLon>Lon: {this.state.longitude}</LatLon>
-				<Text>{this.state.errorText}</Text>
-				<Input
-					value={this.state.message}
-					multiline={true}
-					placeholder='Say something...'
-					onChangeText={this.handleTextChange}
-					underlineColorAndroid='transparent'
-				/>
-				<Submit onPress={this.submitMessageDrop}>
-					<SubmitText>Drop Message</SubmitText>
-				</Submit>
-			</Wrapper>
-		);
-	}
+    render() {
+        return (
+            <Wrapper>
+                {this.drawMap()}
+                <Date>{moment(this.state.position.time).format('MMMM Do YYYY, h:mm:ss a')}</Date>
+                <LatLon>Lat: {this.state.position.lat}</LatLon>
+                <LatLon>Lon: {this.state.position.lng}</LatLon>
+                <Text>{this.state.errorText}</Text>
+                <MessageForm position={this.state.position} />
+            </Wrapper>
+        );
+    }
 };

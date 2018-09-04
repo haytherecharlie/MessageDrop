@@ -5,7 +5,7 @@ import { createStackNavigator, createBottomTabNavigator } from 'react-navigation
 import TabBarIcon from '../../components/atoms/TabBarIcon';
 import ComposeScreen from '../../components/views/ComposeScreen';
 import DropsScreen from '../../components/views/DropsScreen';
-import SettingsScreen from '../../components/views/SettingsScreen';
+// import SettingsScreen from '../../components/views/SettingsScreen';
 
 const ComposeStack = createStackNavigator({
 	Home: ComposeScreen,
@@ -39,22 +39,22 @@ DropsStack.navigationOptions = {
 	),
 };
 
-const SettingsStack = createStackNavigator({
-	Settings: SettingsScreen,
-});
+// const SettingsStack = createStackNavigator({
+// 	Settings: SettingsScreen,
+// });
 
-SettingsStack.navigationOptions = {
-	tabBarLabel: 'Settings',
-	tabBarIcon: ({ focused }) => (
-		<TabBarIcon
-			focused={focused}
-			name={Platform.OS === 'ios' ? `ios-options${focused ? '' : '-outline'}` : 'md-options'}
-		/>
-	),
-};
+// SettingsStack.navigationOptions = {
+// 	tabBarLabel: 'Settings',
+// 	tabBarIcon: ({ focused }) => (
+// 		<TabBarIcon
+// 			focused={focused}
+// 			name={Platform.OS === 'ios' ? `ios-options${focused ? '' : '-outline'}` : 'md-options'}
+// 		/>
+// 	),
+// };
 
 export default createBottomTabNavigator({
 	ComposeStack,
 	DropsStack,
-	SettingsStack,
+	// SettingsStack,
 });
