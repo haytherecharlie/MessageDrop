@@ -25,9 +25,9 @@ class MessageForm extends React.Component {
             <Form>
                 <MessageInput message={this.state.message} change={message => this.setState({ message })} />
                 <MessageSubmit
-                    timestamp={this.props.position.timestamp}
-                    latitude={this.props.position.latitude}
-                    longitude={this.props.position.longitude}
+                    timestamp={this.props.position.time}
+                    latitude={this.props.position.lat}
+                    longitude={this.props.position.lng}
                     message={this.state.message}
                     reset={() => this.setState({ message: "" })}
                 />
